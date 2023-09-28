@@ -3,18 +3,19 @@ import { walletConnectProvider } from "@web3modal/wagmi";
 import { createWeb3Modal } from "@web3modal/wagmi/vue";
 
 import { configureChains, createConfig } from "@wagmi/core";
-import { mainnet } from "@wagmi/core/chains";
+import { bsc } from "@wagmi/core/chains";
 import { publicProvider } from "@wagmi/core/providers/public";
 import { InjectedConnector } from "@wagmi/core";
 import { CoinbaseWalletConnector } from "@wagmi/core/connectors/coinbaseWallet";
 import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
+import { useWeb3Modal } from "@web3modal/wagmi/vue";
 
 // 1. Define constants
 const projectId = "2c7be61ff62679a49304f7c6f1686b38";
 
 // 2. Configure wagmi client
 const { chains, publicClient } = configureChains(
-  [mainnet],
+  [bsc],
   [walletConnectProvider({ projectId }), publicProvider()]
 );
 
@@ -40,8 +41,10 @@ const wagmiConfig = createConfig({
 
 // 3. Create modal
 createWeb3Modal({ wagmiConfig, projectId, chains });
+
+const modal = useWeb3Modal();
 </script>
 
 <template>
-  <button @click="connectWallet">Connect Wallet Connect</button>
+  <button @click="modal.open({ view: 'Networks' })">Open Network Modal</button>
 </template>

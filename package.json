@@ -20,7 +20,8 @@
     "lint:pretty": "pretty-quick --staged",
     "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm lint:stylelint",
     "prepare": "husky install",
-    "preinstall": "npx only-allow pnpm"
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "husky install"
   },
   "browserslist": [
     "> 1%",
@@ -86,6 +87,7 @@
     "vue-virtual-scroller": "2.0.0-alpha.1",
     "vuedraggable": "^4.1.0",
     "vxe-table": "4.3.0-beta.3",
+    "wagmi": "^1.4.2",
     "web3": "^4.1.2",
     "xe-utils": "^3.5.6",
     "xgplayer": "^2.31.7",

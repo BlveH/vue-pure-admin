@@ -179,6 +179,9 @@ dependencies:
   vxe-table:
     specifier: 4.3.0-beta.3
     version: 4.3.0-beta.3(vue@3.2.37)(xe-utils@3.5.6)
+  wagmi:
+    specifier: ^1.4.2
+    version: 1.4.2(react-native@0.72.5)(react@18.2.0)(typescript@4.7.4)(viem@1.13.1)
   web3:
     specifier: ^4.1.2
     version: 4.1.2
@@ -5012,6 +5015,64 @@ packages:
       {
         integrity: sha512-Ccy0NlLkzr0Ex2FKvh2X+OyERHXJ88XJ1MXtsI9y9fGexlaXaVTPzBCRBwIxFkORuOb+uBqeu+RqnpgYTEZRUQ==
       }
+    dev: false
+
+  /@tanstack/query-core@4.35.3:
+    resolution:
+      {
+        integrity: sha512-PS+WEjd9wzKTyNjjQymvcOe1yg8f3wYc6mD+vb6CKyZAKvu4sIJwryfqfBULITKCla7P9C4l5e9RXePHvZOZeQ==
+      }
+    dev: false
+
+  /@tanstack/query-persist-client-core@4.35.3:
+    resolution:
+      {
+        integrity: sha512-UlUMsvmy12qgPzphIq8iyFtwxuv/vaEyFQEFDVVCvyrqj2G020qMZiCA1vj3+gasmCXh59EraiC2eY4Iqo0/PA==
+      }
+    dependencies:
+      "@tanstack/query-core": 4.35.3
+    dev: false
+
+  /@tanstack/query-sync-storage-persister@4.35.3:
+    resolution:
+      {
+        integrity: sha512-q9axt4iJkRnhR9R9qou+Q2+T2S21jwgf/7carYs9DQGLoE9r9YnwxgbmDE72yQd1glcsGF26UqqO6WO8ziNCrQ==
+      }
+    dependencies:
+      "@tanstack/query-persist-client-core": 4.35.3
+    dev: false
+
+  /@tanstack/react-query-persist-client@4.35.5(@tanstack/react-query@4.35.3):
+    resolution:
+      {
+        integrity: sha512-d8pFzvMD6AD2guGXLP2A4r0mfCRuZ8C4VMBl5+EZvka/e4o9/DRfizZB4S9w0Za+sOQJ4/SdD3OOk2BwYEykkQ==
+      }
+    peerDependencies:
+      "@tanstack/react-query": ^4.35.3
+    dependencies:
+      "@tanstack/query-persist-client-core": 4.35.3
+      "@tanstack/react-query": 4.35.3(react-native@0.72.5)(react@18.2.0)
+    dev: false
+
+  /@tanstack/react-query@4.35.3(react-native@0.72.5)(react@18.2.0):
+    resolution:
+      {
+        integrity: sha512-UgTPioip/rGG3EQilXfA2j4BJkhEQsR+KAbF+KIuvQ7j4MkgnTCJF01SfRpIRNtQTlEfz/+IL7+jP8WA8bFbsw==
+      }
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0
+      react-native: "*"
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+    dependencies:
+      "@tanstack/query-core": 4.35.3
+      react: 18.2.0
+      react-native: 0.72.5(@babel/core@7.23.0)(@babel/preset-env@7.22.20)(react@18.2.0)
+      use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
 
   /@transloadit/prettier-bytes@0.0.7:
@@ -18791,6 +18852,42 @@ packages:
     dependencies:
       vue: 3.2.37
       xe-utils: 3.5.6
+    dev: false
+
+  /wagmi@1.4.2(react-native@0.72.5)(react@18.2.0)(typescript@4.7.4)(viem@1.13.1):
+    resolution:
+      {
+        integrity: sha512-Cxu0LatB44stqHoqdc6dgsTb9woYH1bEquJFq9PbTkePmnRCvceAD4aFUREUTaBWzIBcouhFlanWweDzEnb3mg==
+      }
+    peerDependencies:
+      react: ">=17.0.0"
+      typescript: ">=5.0.4"
+      viem: ">=0.3.35"
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      "@tanstack/query-sync-storage-persister": 4.35.3
+      "@tanstack/react-query": 4.35.3(react-native@0.72.5)(react@18.2.0)
+      "@tanstack/react-query-persist-client": 4.35.5(@tanstack/react-query@4.35.3)
+      "@wagmi/core": 1.4.2(react@18.2.0)(typescript@4.7.4)(viem@1.13.1)
+      abitype: 0.8.7(typescript@4.7.4)
+      react: 18.2.0
+      typescript: 4.7.4
+      use-sync-external-store: 1.2.0(react@18.2.0)
+      viem: 1.13.1(typescript@4.7.4)
+    transitivePeerDependencies:
+      - "@react-native-async-storage/async-storage"
+      - "@types/react"
+      - bufferutil
+      - encoding
+      - immer
+      - lokijs
+      - react-dom
+      - react-native
+      - supports-color
+      - utf-8-validate
+      - zod
     dev: false
 
   /walker@1.0.8:

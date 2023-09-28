@@ -62,7 +62,10 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
     plugins: getPluginsList(command, VITE_LEGACY),
     optimizeDeps: {
       include: ["pinia", "vue-i18n", "lodash-es", "@vueuse/core", "dayjs"],
-      exclude: ["@pureadmin/theme/dist/browser-utils"]
+      exclude: ["@pureadmin/theme/dist/browser-utils"],
+      esbuildOptions: {
+        target: "esnext" // you can also use 'es2020' here
+      }
     },
     build: {
       sourcemap: false,
@@ -70,7 +73,8 @@ export default ({ command, mode }: ConfigEnv): UserConfigExport => {
       chunkSizeWarningLimit: 4000,
       rollupOptions: {
         external: ["events"]
-      }
+      },
+      target: "esnext"
     },
     define: {
       __INTLIFY_PROD_DEVTOOLS__: false,
