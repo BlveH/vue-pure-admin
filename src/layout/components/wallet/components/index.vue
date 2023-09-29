@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { useBoolean } from "../../../hooks/useBoolean";
 import ListWallet from "/@/layout/components/wallet/components/listWallet.vue";
-
 const { bool: show, toggle } = useBoolean();
+
 function handleSearch() {
   toggle();
 }
 </script>
 <template>
-  <button
-    class="search-container w-40px h-48px flex-c cursor-pointer navbar-bg-hover"
-    @click="handleSearch"
-  >
-    Connect
-  </button>
-  <ListWallet v-model:value="show" />
+  <div>
+    <button
+      class="search-container w-40px h-48px flex-c cursor-pointer navbar-bg-hover"
+      @click="handleSearch"
+    >
+      Connect
+    </button>
+    <ListWallet v-model:value="show" />
+  </div>
 </template>
+
 <style scoped>
 button {
   --color: #0077ff;
