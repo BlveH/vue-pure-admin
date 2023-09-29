@@ -1,10 +1,10 @@
 <template>
   <div>
     <button
-      id="connectAndRequestPermissionsButton"
+      id="connectButton"
       class="connectToMetaMaskButton"
       v-show="!isConnected"
-      @click="connectAndRequestPermissions"
+      @click="connect"
     >
       Metamask
     </button>
@@ -79,15 +79,14 @@ export default {
       if (window.ethereum) {
         this.connectToMetaMask();
       } else {
-        console.log("Please install MetaMask.");
+        alert("Please install MetaMask.");
       }
     });
-    document
-      .getElementById("connectAndRequestPermissionsButton")
-      .addEventListener("click", this.requestPermissions);
+    window.ethereum.on("accountsChanged", this.handleAccountsChanged);
+    document.getElementById("connectButton");
   },
   methods: {
-    async connectAndRequestPermissions() {
+    async connect() {
       try {
         // Request the user to switch to the BNB Smart Chain network.
         await window.ethereum.request({
@@ -118,6 +117,7 @@ export default {
 
         // Show the signature to the user.
         this.siweResult = signature;
+        window.ethereum.on("accountsChanged", this.handleAccountsChanged);
       } catch (switchError) {
         // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
@@ -138,6 +138,29 @@ export default {
                 }
               ]
             });
+            const accounts = await window.ethereum.request({
+              method: "eth_requestAccounts"
+            });
+            const balance = await window.ethereum.request({
+              method: "eth_getBalance",
+              params: [accounts[0]]
+            });
+
+            // Sign the data with the user's Ethereum account.
+            const signature = await siweSign(accounts[0]);
+
+            // If the user signed the data successfully, set the connection status to true.
+            if (signature) {
+              this.isConnected = true;
+            }
+
+            // Update the app state.
+            this.account = accounts[0];
+            this.balance = balance;
+
+            // Show the signature to the user.
+            this.siweResult = signature;
+            window.ethereum.on("accountsChanged", this.handleAccountsChanged);
           } catch (addError) {
             console.error(addError);
           }
@@ -151,6 +174,15 @@ export default {
         this.account = null;
         this.balance = null;
       });
+    },
+    handleAccountsChanged(accounts) {
+      // Update the app state.
+      this.account = accounts[0];
+    },
+    onLogout() {
+      // Disconnect the user.
+      this.account = null;
+      this.balance = null;
     },
     async showBubble() {
       try {
@@ -166,29 +198,6 @@ export default {
         this.showAccountInfo = false;
       } catch (err) {
         console.error(err);
-      }
-    },
-    async requestPermissions() {
-      try {
-        const permissions = await window.ethereum.request({
-          method: "wallet_requestPermissions",
-          params: [{ eth_accounts: {} }]
-        });
-
-        const accountsPermission = permissions.find(
-          permission => permission.parentCapability === "eth_accounts"
-        );
-
-        if (accountsPermission) {
-          console.log("eth_accounts permission successfully requested!");
-        }
-      } catch (error) {
-        if (error.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          console.log("Permissions needed to continue.");
-        } else {
-          console.error(error);
-        }
       }
     }
   }

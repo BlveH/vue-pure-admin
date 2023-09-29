@@ -5,6 +5,7 @@
       <li>Address: {{ account }}</li>
       <li>Balance: {{ balance }}</li>
     </ul>
+    <button>Log Out</button>
   </div>
 </template>
 
@@ -28,6 +29,31 @@ export default defineComponent({
     return {
       draggable: true
     };
+  },
+  methods: {
+    // async logout() {
+    //   // Disconnect the user.
+    //   await window.ethereum.request({
+    //     method: "wallet_disconnect"
+    //   });
+    //
+    //   // Request a new connection.
+    //   const accounts = await window.ethereum.request({
+    //       method: "wallet_requestPermissions",
+    //       params: [
+    //         {
+    //           eth_accounts: {}
+    //         }
+    //       ]
+    //     })
+    //     .then(() =>
+    //       window.ethereum.request({
+    //         method: "eth_requestAccounts"
+    //   }));
+    //
+    //   // Update the app state.
+    //   // this.account = accounts[0];
+    // }
   }
 });
 </script>
