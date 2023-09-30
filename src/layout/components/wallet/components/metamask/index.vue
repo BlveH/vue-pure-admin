@@ -14,6 +14,7 @@
         :account="account"
         :balance="balance"
         :draggable="true"
+        @logout="onLogout"
         :position="{ top: 50, left: 50 }"
       />
     </div>
@@ -179,11 +180,18 @@ export default {
       // Update the app state.
       this.account = accounts[0];
     },
-    onLogout() {
-      // Disconnect the user.
+    async onLogout() {
+      // Xóa thông tin tài khoản và đặt lại trạng thái chưa kết nối.
       this.account = null;
       this.balance = null;
+      this.isConnected = false;
+
+      // Ẩn thông tin tài khoản.
+      this.showAccountInfo = false;
+
+      // Nếu bạn cần xóa thêm dữ liệu khác hoặc thực hiện các thao tác khác khi đăng xuất, hãy thêm chúng ở đây.
     },
+
     async showBubble() {
       try {
         // Show the account information.
@@ -245,18 +253,5 @@ button:before {
 button:hover::before {
   top: -30px;
   left: -30px;
-}
-
-.account-bubble {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 500px;
-  height: 200px;
-  background-color: white;
-  border: 1px solid black;
-  padding: 10px;
-  cursor: move;
 }
 </style>
