@@ -26,6 +26,7 @@
     >
       Account
     </button>
+    <button class="sendEthButton btn" v-show="isConnected">Send ETH</button>
 
     <button
       class="closeAccountBubbleButton"
@@ -42,6 +43,8 @@ import { onMounted } from "vue";
 import AccountBubble from "./accountBubble.vue";
 import { Buffer } from "buffer";
 
+const ethereum: any = window.ethereum;
+
 async function siweSign(account) {
   const domain = window.location.host;
   const from = account;
@@ -49,7 +52,7 @@ async function siweSign(account) {
   const msg = `0x${Buffer.from(siweMessage, "utf8").toString("hex")}`;
   try {
     // Sign the data with the user's Ethereum account.
-    const signature = await window.ethereum.request({
+    const signature = await ethereum.request({
       method: "personal_sign",
       params: [msg, from]
     });
@@ -83,23 +86,23 @@ export default {
         alert("Please install MetaMask.");
       }
     });
-    window.ethereum.on("accountsChanged", this.handleAccountsChanged);
+    ethereum.on("accountsChanged", this.handleAccountsChanged);
     document.getElementById("connectButton");
   },
   methods: {
     async connect() {
       try {
         // Request the user to switch to the BNB Smart Chain network.
-        await window.ethereum.request({
+        await ethereum.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: "0x38" }]
         });
 
         // Get the account balance.
-        const accounts = await window.ethereum.request({
+        const accounts = await ethereum.request({
           method: "eth_requestAccounts"
         });
-        const balance = await window.ethereum.request({
+        const balance = await ethereum.request({
           method: "eth_getBalance",
           params: [accounts[0]]
         });
@@ -118,13 +121,13 @@ export default {
 
         // Show the signature to the user.
         this.siweResult = signature;
-        window.ethereum.on("accountsChanged", this.handleAccountsChanged);
+        ethereum.on("accountsChanged", this.handleAccountsChanged);
       } catch (switchError) {
         // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
           try {
             // Add the BNB Smart Chain network to MetaMask.
-            await window.ethereum.request({
+            await ethereum.request({
               method: "wallet_addEthereumChain",
               params: [
                 {
@@ -139,10 +142,10 @@ export default {
                 }
               ]
             });
-            const accounts = await window.ethereum.request({
+            const accounts = await ethereum.request({
               method: "eth_requestAccounts"
             });
-            const balance = await window.ethereum.request({
+            const balance = await ethereum.request({
               method: "eth_getBalance",
               params: [accounts[0]]
             });
@@ -161,7 +164,7 @@ export default {
 
             // Show the signature to the user.
             this.siweResult = signature;
-            window.ethereum.on("accountsChanged", this.handleAccountsChanged);
+            ethereum.on("accountsChanged", this.handleAccountsChanged);
           } catch (addError) {
             console.error(addError);
           }
@@ -170,7 +173,7 @@ export default {
         }
       }
       // Disconnect the user if the network changes.
-      window.ethereum.on("chainChanged", () => {
+      ethereum.on("chainChanged", () => {
         this.isConnected = false;
         this.account = null;
         this.balance = null;

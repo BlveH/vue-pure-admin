@@ -31,7 +31,8 @@
       "element-plus/global",
       "@pureadmin/table/volar",
       "unplugin-vue-define-options",
-      "@pureadmin/descriptions/volar"
+      "@pureadmin/descriptions/volar",
+      "@metamask/types"
     ],
     "typeRoots": ["./node_modules/@types/", "./types"]
   },

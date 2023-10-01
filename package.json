@@ -34,6 +34,7 @@
     "@logicflow/core": "^1.1.24",
     "@logicflow/extension": "^1.1.24",
     "@metamask/sdk": "^0.7.1",
+    "@metamask/types": "^1.1.0",
     "@pureadmin/components": "^1.1.0",
     "@pureadmin/descriptions": "^1.1.0",
     "@pureadmin/table": "^1.2.0",
