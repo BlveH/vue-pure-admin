@@ -26,7 +26,22 @@
     >
       Account
     </button>
-    <button class="sendEthButton btn" v-show="isConnected">Send ETH</button>
+    <button
+      class="sendEthButton btn"
+      v-show="isConnected"
+      @click="showSendEthBubble = true"
+    >
+      Send ETH
+    </button>
+    <div v-if="showSendEthBubble">
+      <div class="sendEthBubble">
+        <h2>Send ETH</h2>
+        <input type="text" placeholder="To Address" v-model="toAddress" />
+        <input type="number" placeholder="Amount" v-model.number="amount" />
+        <button @click="sendEth">Send</button>
+        <button @click="closeSendEthBubble">Cancel</button>
+      </div>
+    </div>
 
     <button
       class="closeAccountBubbleButton"
@@ -75,7 +90,10 @@ export default {
       balance: null,
       showAccountInfo: false,
       isConnected: false,
-      siweResult: ""
+      siweResult: "",
+      toAddress: "",
+      amount: null,
+      showSendEthBubble: false
     };
   },
   mounted() {
@@ -209,6 +227,57 @@ export default {
         this.showAccountInfo = false;
       } catch (err) {
         console.error(err);
+      }
+    },
+    async sendEth(toAddress, amount) {
+      try {
+        // Kiểm tra xem người dùng đã kết nối với MetaMask hay chưa.
+        if (!this.isConnected) {
+          throw new Error("Please connect to MetaMask.");
+        }
+        // Kiểm tra xem người dùng có đủ ETH để gửi hay không.
+        const balance = await ethereum.request({
+          method: "eth_getBalance",
+          params: [this.account]
+        });
+        if (balance < amount) {
+          throw new Error("Insufficient balance.");
+        }
+
+        // Gửi ETH.
+        const txHash = await ethereum.request({
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: this.account, // The user's active address.
+              to: toAddress, // Required except during contract publications.
+              value: amount, // Only required to send ether to the recipient from the initiating external account.
+              gasLimit: "0x5028", // Customizable by the user during MetaMask confirmation.
+              maxPriorityFeePerGas: "0x3b9aca00", // Customizable by the user during MetaMask confirmation.
+              maxFeePerGas: "0x2540be400" // Customizable by the user during MetaMask confirmation.
+            }
+          ]
+        });
+
+        // Xác nhận giao dịch.
+        await ethereum.request({
+          method: "eth_getTransactionReceipt",
+          params: [txHash]
+        });
+
+        // Đặt showSendEthBubble thành true để hiển thị bubble.
+        this.showSendEthBubble = true;
+      } catch (err) {
+        console.error(err);
+        alert("Failed to send ETH.");
+      }
+    },
+
+    closeSendEthBubble() {
+      const bubble = document.querySelector(".sendEthBubble");
+      if (bubble) {
+        bubble.remove();
+        this.showSendEthBubble = false;
       }
     }
   }
