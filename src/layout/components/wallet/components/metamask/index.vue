@@ -40,6 +40,9 @@
         <button @click="sendEth">Send</button>
         <button @click="closeSendEthBubble">Cancel</button>
       </div>
+      <div v-if="transactionSuccess" class="transaction-success">
+        Transaction successful!
+      </div>
     </div>
 
     <button
@@ -66,11 +69,10 @@ async function siweSign(account: any) {
   const msg = `0x${Buffer.from(siweMessage, "utf8").toString("hex")}`;
   try {
     // Sign the data with the user's Ethereum account.
-    const signature = await ethereum.request({
+    return await ethereum.request({
       method: "personal_sign",
       params: [msg, from]
     });
-    return signature;
   } catch (err) {
     console.error(err);
     return "";
@@ -90,7 +92,8 @@ export default {
       isConnected: false,
       toAddress: "",
       amount: null,
-      showSendEthBubble: false
+      showSendEthBubble: false,
+      transactionSuccess: false
     };
   },
   mounted() {
@@ -194,7 +197,7 @@ export default {
     async updateBalance() {
       try {
         if (this.account) {
-          // Lấy số dư của tài khoản hiện tại
+          // Get balance of certain account
           const balance = await ethereum.request({
             method: "eth_getBalance",
             params: [this.account]
@@ -205,7 +208,7 @@ export default {
         console.error(error);
       }
     },
-    handleAccountsChanged(accounts) {
+    handleAccountsChanged(accounts: any[]) {
       this.account = accounts[0];
       this.updateBalance();
     },
@@ -230,7 +233,8 @@ export default {
           method: "eth_getBalance",
           params: [this.account]
         });
-        if (balance < this.amount) {
+        const amountInWei = this.amount * 1e18; // Convery amount to Wei (1 Ether = 1e18 Wei)
+        if (balance < amountInWei) {
           throw new Error("Insufficient balance.");
         }
         const txHash = await ethereum.request({
@@ -239,7 +243,7 @@ export default {
             {
               from: this.account,
               to: this.toAddress,
-              value: this.amount,
+              value: `0x${amountInWei.toString(16)}`, // Convert amount to hex
               gasLimit: "0x5028",
               maxPriorityFeePerGas: "0x3b9aca00",
               maxFeePerGas: "0x2540be400"
@@ -250,12 +254,17 @@ export default {
           method: "eth_getTransactionReceipt",
           params: [txHash]
         });
+
+        this.transactionSuccess = true;
+        this.toAddress = "";
+        this.amount = null;
         this.showSendEthBubble = true;
       } catch (err) {
         console.error(err);
         alert("Failed to send ETH.");
       }
     },
+
     closeSendEthBubble() {
       this.showSendEthBubble = false;
     }
