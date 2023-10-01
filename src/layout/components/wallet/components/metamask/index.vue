@@ -198,11 +198,10 @@ export default {
       try {
         if (this.account) {
           // Get balance of certain account
-          const balance = await ethereum.request({
+          this.balance = await ethereum.request({
             method: "eth_getBalance",
             params: [this.account]
           });
-          this.balance = balance;
         }
       } catch (error) {
         console.error(error);
@@ -233,7 +232,7 @@ export default {
           method: "eth_getBalance",
           params: [this.account]
         });
-        const amountInWei = this.amount * 1e18; // Convery amount to Wei (1 Ether = 1e18 Wei)
+        const amountInWei = this.amount * 1e18; // Convert amount to Wei (1 Ether = 1e18 Wei)
         if (balance < amountInWei) {
           throw new Error("Insufficient balance.");
         }
