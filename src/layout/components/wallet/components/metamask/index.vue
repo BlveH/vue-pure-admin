@@ -1,7 +1,6 @@
 <template>
   <div>
     <button
-      id="connectButton"
       class="connectToMetaMaskButton"
       v-show="!isConnected"
       @click="connect"
@@ -60,7 +59,7 @@ import { Buffer } from "buffer";
 
 const ethereum: any = window.ethereum;
 
-async function siweSign(account) {
+async function siweSign(account: any) {
   const domain = window.location.host;
   const from = account;
   const siweMessage = `${domain} wants you to sign in with your Ethereum account:\n${from}\n\nI accept the MetaMask Terms of Service: https://community.metamask.io/tos\n\nURI: https://${domain}\nVersion: 1\nChain ID: 1\nNonce: 32891757\nIssued At: 2023-09-28T10:26:48.000Z`;
@@ -86,11 +85,9 @@ export default {
   data() {
     return {
       account: null,
-      currentAccount: null,
       balance: null,
       showAccountInfo: false,
       isConnected: false,
-      siweResult: "",
       toAddress: "",
       amount: null,
       showSendEthBubble: false
@@ -99,13 +96,12 @@ export default {
   mounted() {
     onMounted(() => {
       if (window.ethereum) {
-        this.connectToMetaMask();
+        this.connect();
       } else {
         alert("Please install MetaMask.");
       }
     });
     ethereum.on("accountsChanged", this.handleAccountsChanged);
-    document.getElementById("connectButton");
   },
   methods: {
     async connect() {
@@ -113,7 +109,7 @@ export default {
         // Request the user to switch to the BNB Smart Chain network.
         await ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x38" }]
+          params: [{ chainId: "0xaa36a7" }]
         });
 
         // Get the account balance.
@@ -141,7 +137,6 @@ export default {
         this.siweResult = signature;
         ethereum.on("accountsChanged", this.handleAccountsChanged);
       } catch (switchError) {
-        // This error code indicates that the chain has not been added to MetaMask.
         if (switchError.code === 4902) {
           try {
             // Add the BNB Smart Chain network to MetaMask.
@@ -149,12 +144,12 @@ export default {
               method: "wallet_addEthereumChain",
               params: [
                 {
-                  chainId: "0x38",
-                  chainName: "BNB Smart Chain",
-                  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+                  chainId: "0xaa36a7",
+                  chainName: "Sepolia test network",
+                  rpcUrls: ["https://sepolia.infura.io/v3/"],
                   nativeCurrency: {
-                    name: "BNB",
-                    symbol: "BNB",
+                    name: "SepoliaETH",
+                    symbol: "SepoliaETH",
                     decimals: 18
                   }
                 }
@@ -190,95 +185,79 @@ export default {
           console.error(switchError);
         }
       }
-      // Disconnect the user if the network changes.
       ethereum.on("chainChanged", () => {
         this.isConnected = false;
         this.account = null;
         this.balance = null;
       });
     },
+    async updateBalance() {
+      try {
+        if (this.account) {
+          // Lấy số dư của tài khoản hiện tại
+          const balance = await ethereum.request({
+            method: "eth_getBalance",
+            params: [this.account]
+          });
+          this.balance = balance;
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },
     handleAccountsChanged(accounts) {
-      // Update the app state.
       this.account = accounts[0];
+      this.updateBalance();
     },
     async onLogout() {
-      // Xóa thông tin tài khoản và đặt lại trạng thái chưa kết nối.
       this.account = null;
       this.balance = null;
       this.isConnected = false;
-
-      // Ẩn thông tin tài khoản.
       this.showAccountInfo = false;
-
-      // Nếu bạn cần xóa thêm dữ liệu khác hoặc thực hiện các thao tác khác khi đăng xuất, hãy thêm chúng ở đây.
     },
-
     async showBubble() {
-      try {
-        // Show the account information.
-        this.showAccountInfo = true;
-      } catch (err) {
-        console.error(err);
-      }
+      this.showAccountInfo = true;
     },
     async unShowBubble() {
-      try {
-        // Show the account information.
-        this.showAccountInfo = false;
-      } catch (err) {
-        console.error(err);
-      }
+      this.showAccountInfo = false;
     },
-    async sendEth(toAddress, amount) {
+    async sendEth() {
       try {
-        // Kiểm tra xem người dùng đã kết nối với MetaMask hay chưa.
         if (!this.isConnected) {
           throw new Error("Please connect to MetaMask.");
         }
-        // Kiểm tra xem người dùng có đủ ETH để gửi hay không.
         const balance = await ethereum.request({
           method: "eth_getBalance",
           params: [this.account]
         });
-        if (balance < amount) {
+        if (balance < this.amount) {
           throw new Error("Insufficient balance.");
         }
-
-        // Gửi ETH.
         const txHash = await ethereum.request({
           method: "eth_sendTransaction",
           params: [
             {
-              from: this.account, // The user's active address.
-              to: toAddress, // Required except during contract publications.
-              value: amount, // Only required to send ether to the recipient from the initiating external account.
-              gasLimit: "0x5028", // Customizable by the user during MetaMask confirmation.
-              maxPriorityFeePerGas: "0x3b9aca00", // Customizable by the user during MetaMask confirmation.
-              maxFeePerGas: "0x2540be400" // Customizable by the user during MetaMask confirmation.
+              from: this.account,
+              to: this.toAddress,
+              value: this.amount,
+              gasLimit: "0x5028",
+              maxPriorityFeePerGas: "0x3b9aca00",
+              maxFeePerGas: "0x2540be400"
             }
           ]
         });
-
-        // Xác nhận giao dịch.
         await ethereum.request({
           method: "eth_getTransactionReceipt",
           params: [txHash]
         });
-
-        // Đặt showSendEthBubble thành true để hiển thị bubble.
         this.showSendEthBubble = true;
       } catch (err) {
         console.error(err);
         alert("Failed to send ETH.");
       }
     },
-
     closeSendEthBubble() {
-      const bubble = document.querySelector(".sendEthBubble");
-      if (bubble) {
-        bubble.remove();
-        this.showSendEthBubble = false;
-      }
+      this.showSendEthBubble = false;
     }
   }
 };
