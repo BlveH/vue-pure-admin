@@ -56,7 +56,6 @@
 </template>
 
 <script lang="ts">
-import { onMounted } from "vue";
 import AccountBubble from "./accountBubble.vue";
 import { Buffer } from "buffer";
 
@@ -96,14 +95,8 @@ export default {
       transactionSuccess: false
     };
   },
-  mounted() {
-    onMounted(() => {
-      if (window.ethereum) {
-        this.connect();
-      } else {
-        alert("Please install MetaMask.");
-      }
-    });
+  async mounted() {
+    await this.connect();
     ethereum.on("accountsChanged", this.handleAccountsChanged);
   },
   methods: {
@@ -119,45 +112,37 @@ export default {
         const accounts = await ethereum.request({
           method: "eth_requestAccounts"
         });
-        const connectedAccount = localStorage.getItem("connectedAccount");
 
-        for (let i = 0; i < accounts.length; i++) {
-          if (connectedAccount === accounts[i]) {
+        if (localStorage.getItem("connectedAccount") === "true") {
+          this.isConnected = true;
+          this.account = accounts[0];
+          const balance = await ethereum.request({
+            method: "eth_getBalance",
+            params: [accounts[0]]
+          });
+          // Update the app state.
+          this.account = accounts[0];
+          this.balance = balance;
+        } else {
+          // Sign the data with the user's Ethereum account.
+          const signature = await siweSign(accounts[0]);
+
+          // If the user signed the data successfully, set the connection status to true.
+          if (signature) {
             this.isConnected = true;
-            this.account = connectedAccount;
-            const balance = await ethereum.request({
-              method: "eth_getBalance",
-              params: [accounts[0]]
-            });
-            // Update the app state.
-            this.account = accounts[0];
-            this.balance = balance;
-            return;
-          } else {
-            // Sign the data with the user's Ethereum account.
-            const signature = await siweSign(accounts[0]);
 
-            // If the user signed the data successfully, set the connection status to true.
-            if (signature) {
-              this.isConnected = true;
-              const accounts = await ethereum.request({
-                method: "eth_requestAccounts"
-              });
-
-              localStorage.setItem("connectedAccount", accounts[0]);
-            }
-
-            // Show the signature to the user.
-            this.siweResult = signature;
-            const balance = await ethereum.request({
-              method: "eth_getBalance",
-              params: [accounts[0]]
-            });
-            // Update the app state.
-            this.account = accounts[0];
-            this.balance = balance;
-            return;
+            localStorage.setItem("connectedAccount", true);
           }
+
+          // Show the signature to the user.
+          this.siweResult = signature;
+          const balance = await ethereum.request({
+            method: "eth_getBalance",
+            params: [accounts[0]]
+          });
+          // Update the app state.
+          this.account = accounts[0];
+          this.balance = balance;
         }
 
         const balance = await ethereum.request({
@@ -191,45 +176,38 @@ export default {
             const accounts = await ethereum.request({
               method: "eth_requestAccounts"
             });
-            const connectedAccount = localStorage.getItem("connectedAccount");
-            for (let i = 0; i < accounts.length; i++) {
-              if (connectedAccount === accounts[i]) {
+
+            if (localStorage.getItem("connectedAccount") === "true") {
+              this.isConnected = true;
+              this.account = accounts[0];
+              const balance = await ethereum.request({
+                method: "eth_getBalance",
+                params: [accounts[0]]
+              });
+              // Update the app state.
+              this.account = accounts[0];
+              this.balance = balance;
+            } else {
+              // Sign the data with the user's Ethereum account.
+              const signature = await siweSign(accounts[0]);
+
+              // If the user signed the data successfully, set the connection status to true.
+              if (signature) {
                 this.isConnected = true;
-                this.account = connectedAccount;
-                const balance = await ethereum.request({
-                  method: "eth_getBalance",
-                  params: [accounts[0]]
-                });
-                // Update the app state.
-                this.account = accounts[0];
-                this.balance = balance;
-                return;
-              } else {
-                // Sign the data with the user's Ethereum account.
-                const signature = await siweSign(accounts[0]);
 
-                // If the user signed the data successfully, set the connection status to true.
-                if (signature) {
-                  this.isConnected = true;
-                  const accounts = await ethereum.request({
-                    method: "eth_requestAccounts"
-                  });
-
-                  // Save account to Local Storage
-                  localStorage.setItem("connectedAccount", accounts[0]);
-                }
-
-                // Show the signature to the user.
-                this.siweResult = signature;
-                const balance = await ethereum.request({
-                  method: "eth_getBalance",
-                  params: [accounts[0]]
-                });
-                // Update the app state.
-                this.account = accounts[0];
-                this.balance = balance;
-                return;
+                // Save account to Local Storage
+                localStorage.setItem("connectedAccount", true);
               }
+
+              // Show the signature to the user.
+              this.siweResult = signature;
+              const balance = await ethereum.request({
+                method: "eth_getBalance",
+                params: [accounts[0]]
+              });
+              // Update the app state.
+              this.account = accounts[0];
+              this.balance = balance;
             }
 
             const balance = await ethereum.request({
@@ -270,13 +248,14 @@ export default {
     handleAccountsChanged(accounts: any[]) {
       this.account = accounts[0];
       this.updateBalance();
+      window.location.reload();
     },
     async onLogout() {
       this.account = null;
       this.balance = null;
       this.isConnected = false;
       this.showAccountInfo = false;
-      localStorage.removeItem("connectedAccount");
+      localStorage.setItem("connectedAccount", false);
     },
     async showBubble() {
       this.showAccountInfo = true;
