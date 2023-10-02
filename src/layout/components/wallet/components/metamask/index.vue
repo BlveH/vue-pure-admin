@@ -202,6 +202,11 @@ export default {
                 this.siweResult = signature;
               }
             }
+
+            const balance = await ethereum.request({
+              method: "eth_getBalance",
+              params: [accounts[0]]
+            });
             // Update the app state.
             this.account = accounts[0];
             this.balance = balance;
