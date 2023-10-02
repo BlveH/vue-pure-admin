@@ -119,25 +119,40 @@ export default {
         const accounts = await ethereum.request({
           method: "eth_requestAccounts"
         });
+        const connectedAccount = localStorage.getItem("connectedAccount");
+        console.log(connectedAccount);
+        for (let i = 0; i < accounts.length; i++) {
+          if (connectedAccount === accounts[i]) {
+            this.isConnected = true;
+            this.account = connectedAccount;
+            return;
+          } else {
+            // Sign the data with the user's Ethereum account.
+            const signature = await siweSign(accounts[0]);
+
+            // If the user signed the data successfully, set the connection status to true.
+            if (signature) {
+              this.isConnected = true;
+              const accounts = await ethereum.request({
+                method: "eth_requestAccounts"
+              });
+
+              localStorage.setItem("connectedAccount", accounts[0]);
+            }
+
+            // Show the signature to the user.
+            this.siweResult = signature;
+          }
+        }
+
         const balance = await ethereum.request({
           method: "eth_getBalance",
           params: [accounts[0]]
         });
-
-        // Sign the data with the user's Ethereum account.
-        const signature = await siweSign(accounts[0]);
-
-        // If the user signed the data successfully, set the connection status to true.
-        if (signature) {
-          this.isConnected = true;
-        }
-
         // Update the app state.
         this.account = accounts[0];
         this.balance = balance;
 
-        // Show the signature to the user.
-        this.siweResult = signature;
         ethereum.on("accountsChanged", this.handleAccountsChanged);
       } catch (switchError) {
         if (switchError.code === 4902) {
@@ -161,25 +176,36 @@ export default {
             const accounts = await ethereum.request({
               method: "eth_requestAccounts"
             });
-            const balance = await ethereum.request({
-              method: "eth_getBalance",
-              params: [accounts[0]]
-            });
+            const connectedAccount = localStorage.getItem("connectedAccount");
+            console.log(connectedAccount);
+            for (let i = 0; i < accounts.length; i++) {
+              if (connectedAccount === accounts[i]) {
+                this.isConnected = true;
+                this.account = connectedAccount;
+                return;
+              } else {
+                // Sign the data with the user's Ethereum account.
+                const signature = await siweSign(accounts[0]);
 
-            // Sign the data with the user's Ethereum account.
-            const signature = await siweSign(accounts[0]);
+                // If the user signed the data successfully, set the connection status to true.
+                if (signature) {
+                  this.isConnected = true;
+                  const accounts = await ethereum.request({
+                    method: "eth_requestAccounts"
+                  });
 
-            // If the user signed the data successfully, set the connection status to true.
-            if (signature) {
-              this.isConnected = true;
+                  // Save account to Local Storage
+                  localStorage.setItem("connectedAccount", accounts[0]);
+                }
+
+                // Show the signature to the user.
+                this.siweResult = signature;
+              }
             }
-
             // Update the app state.
             this.account = accounts[0];
             this.balance = balance;
 
-            // Show the signature to the user.
-            this.siweResult = signature;
             ethereum.on("accountsChanged", this.handleAccountsChanged);
           } catch (addError) {
             console.error(addError);
@@ -216,6 +242,7 @@ export default {
       this.balance = null;
       this.isConnected = false;
       this.showAccountInfo = false;
+      localStorage.removeItem("connectedAccount");
     },
     async showBubble() {
       this.showAccountInfo = true;

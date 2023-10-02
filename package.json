@@ -40,6 +40,7 @@
     "@pureadmin/table": "^1.2.0",
     "@pureadmin/utils": "^0.1.1",
     "@usedapp/core": "^1.2.13",
+    "@vue/composition-api": "^1.7.2",
     "@vueuse/core": "^9.1.0",
     "@vueuse/motion": "2.0.0-beta.12",
     "@vueuse/shared": "^9.1.0",
