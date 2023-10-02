@@ -5,8 +5,8 @@
     v-model="show"
     :before-close="handleClose"
   >
-    <Metamask />
-    <WalletConnection />
+    <Metamask id="Metamask" />
+    <WalletConnection id="WalletConnection" />
   </el-dialog>
 </template>
 
@@ -46,11 +46,20 @@ watch(show, async val => {
 
 function handleClose() {
   show.value = false;
+  if (window.ethereum && !window.walletconnect) {
+    document.querySelector("#WalletConnection")?.classList.add("hidden");
+  } else if (!window.ethereum && window.walletconnect) {
+    document.querySelector("#Metamask")?.classList.add("hidden");
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .search-result-container {
   margin-top: 20px;
+}
+
+.hidden {
+  display: none;
 }
 </style>

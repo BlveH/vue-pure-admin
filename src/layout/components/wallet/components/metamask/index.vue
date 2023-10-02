@@ -120,11 +120,18 @@ export default {
           method: "eth_requestAccounts"
         });
         const connectedAccount = localStorage.getItem("connectedAccount");
-        console.log(connectedAccount);
+
         for (let i = 0; i < accounts.length; i++) {
           if (connectedAccount === accounts[i]) {
             this.isConnected = true;
             this.account = connectedAccount;
+            const balance = await ethereum.request({
+              method: "eth_getBalance",
+              params: [accounts[0]]
+            });
+            // Update the app state.
+            this.account = accounts[0];
+            this.balance = balance;
             return;
           } else {
             // Sign the data with the user's Ethereum account.
@@ -142,6 +149,14 @@ export default {
 
             // Show the signature to the user.
             this.siweResult = signature;
+            const balance = await ethereum.request({
+              method: "eth_getBalance",
+              params: [accounts[0]]
+            });
+            // Update the app state.
+            this.account = accounts[0];
+            this.balance = balance;
+            return;
           }
         }
 
@@ -177,11 +192,17 @@ export default {
               method: "eth_requestAccounts"
             });
             const connectedAccount = localStorage.getItem("connectedAccount");
-            console.log(connectedAccount);
             for (let i = 0; i < accounts.length; i++) {
               if (connectedAccount === accounts[i]) {
                 this.isConnected = true;
                 this.account = connectedAccount;
+                const balance = await ethereum.request({
+                  method: "eth_getBalance",
+                  params: [accounts[0]]
+                });
+                // Update the app state.
+                this.account = accounts[0];
+                this.balance = balance;
                 return;
               } else {
                 // Sign the data with the user's Ethereum account.
@@ -200,6 +221,14 @@ export default {
 
                 // Show the signature to the user.
                 this.siweResult = signature;
+                const balance = await ethereum.request({
+                  method: "eth_getBalance",
+                  params: [accounts[0]]
+                });
+                // Update the app state.
+                this.account = accounts[0];
+                this.balance = balance;
+                return;
               }
             }
 

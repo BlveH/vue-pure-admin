@@ -39,6 +39,7 @@ declare global {
     oRequestAnimationFrame: (callback: FrameRequestCallback) => number;
     msRequestAnimationFrame: (callback: FrameRequestCallback) => number;
     ethereum?: EthereumProvider;
+    walletconnect: any;
   }
 
   // vue
