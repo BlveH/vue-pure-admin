@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { walletConnectProvider } from "@web3modal/wagmi";
 import { createWeb3Modal, useWeb3Modal } from "@web3modal/wagmi/vue";
 import { configureChains, createConfig } from "@wagmi/core";
@@ -8,6 +8,7 @@ import { publicProvider } from "@wagmi/core/providers/public";
 import { WalletConnectConnector } from "@wagmi/core/connectors/walletConnect";
 import { sendTransaction } from "@wagmi/core";
 import { parseUnits } from "ethers";
+import { getAccount } from "@wagmi/core";
 
 const toAddress = ref("");
 const amount = ref(""); // Allow user input for amount
@@ -84,22 +85,43 @@ async function sendEth(toAddress: string) {
     throw error;
   }
 }
-
-const isConnected = ref(false);
-
+let isShowed = ref(getAccount().isConnected);
+const needOnMounted = ref(false);
 async function openWeb3Modal() {
   try {
     await modal.open();
-    isConnected.value = true;
     error.value = null; // Clear any previous errors
+    needOnMounted.value = true;
   } catch (error) {
     console.error("Error opening Web3Modal:", error);
     error.value = "User rejected or denied the request."; // Set an error message
-    isConnected.value = false;
     // You can choose to show the error message to the user here
   }
 }
 
+async function checkConnect() {
+  try {
+    const check = getAccount();
+    isShowed.value = check.isConnected;
+    console.log(check);
+    return isShowed;
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+onMounted(async () => {
+  await checkConnect();
+});
+
+watch(needOnMounted, newVal => {
+  if (newVal) {
+    onMounted(async () => {
+      await checkConnect();
+      needOnMounted.value = false;
+    });
+  }
+});
 function clearForm() {
   // Reset the form
   toAddress.value = "";
@@ -107,7 +129,7 @@ function clearForm() {
   transactionSuccess.value = false; // Reset transaction success
 }
 
-watch(isConnected, newVal => {
+watch(isShowed, newVal => {
   if (!newVal) {
     // Reset the form and hide the "Send ETH" button
     toAddress.value = "";
@@ -121,17 +143,13 @@ watch(isConnected, newVal => {
   <div>
     <!-- Button to open Web3Modal -->
     <button @click="openWeb3Modal()">WalletConnect</button>
-
     <!-- Display "Send ETH" button when connected -->
-    <button
-      v-if="isConnected && !transactionSuccess"
-      @click="sendEth(toAddress)"
-    >
+    <button v-if="isShowed && !transactionSuccess" @click="sendEth(toAddress)">
       Send ETH
     </button>
 
     <!-- Display Send ETH form when connected and transaction is not successful -->
-    <div v-if="isConnected && !transactionSuccess" class="sendEthBubble">
+    <div v-if="isShowed && !transactionSuccess" class="sendEthBubble">
       <h2>Send ETH</h2>
       <input type="text" placeholder="To Address" v-model="toAddress" />
       <input type="number" placeholder="Amount" v-model="amount" />
